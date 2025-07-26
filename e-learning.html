@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codetech E-Learning Platform</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f5f5f5;
+        }
+
+        header {
+            background-color: #ff6600;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 1rem;
+        }
+
+        .course-card {
+            background: white;
+            border-radius: 10px;
+            margin: 1rem;
+            padding: 1rem;
+            width: 300px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .course-card:hover {
+            transform: scale(1.02);
+        }
+
+        .course-thumbnail {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .course-title {
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        .course-instructor {
+            color: gray;
+            font-size: 0.9rem;
+        }
+
+        .course-detail {
+            padding: 2rem;
+        }
+
+        iframe {
+            width: 100%;
+            height: 400px;
+            border: none;
+            margin-top: 1rem;
+        }
+
+        .lesson-list {
+            margin-top: 1rem;
+        }
+
+        .lesson-item {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background-color: #eee;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .lesson-item.active {
+            background-color: #ff6600;
+            color: white;
+        }
+
+        .back-button {
+            margin-top: 1rem;
+            background: #004a7f;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Codetech E-Learning Platform</h1>
+    </header>
+
+    <div class="container" id="courseList"></div>
+
+    <div class="course-detail hidden" id="courseDetail">
+        <button class="back-button" onclick="goBack()">← Back</button>
+        <h2 id="detailTitle"></h2>
+        <p id="detailInstructor"></p>
+        <div class="lesson-list" id="lessonList"></div>
+        <iframe id="videoPlayer" allowfullscreen></iframe>
+    </div>
+
+    <script>
+        const courses = [
+            {
+                id: 'js101',
+                title: 'JavaScript for Beginners',
+                instructor: 'Codetech Instructor',
+                thumbnail: 'https://i.ytimg.com/vi/YAg0N3ZzV8k/hqdefault.jpg',
+                lessons: [
+                    { id: 'l1', title: 'JS Introduction', videoId: 'YAg0N3ZzV8k' },
+                    { id: 'l2', title: 'JS Variables', videoId: 'UIpXHc6emKs' },
+                    { id: 'l3', title: 'JS Functions', videoId: '3nNQLPbIv7g' }
+                ]
+            },
+            {
+                id: 'html5',
+                title: 'Mastering HTML5',
+                instructor: 'Codetech Instructor',
+                thumbnail: 'https://i.ytimg.com/vi/WL6rRU2zRB0/hqdefault.jpg',
+                lessons: [
+                    { id: 'l1', title: 'HTML Basics', videoId: 'WL6rRU2zRB0' },
+                    { id: 'l2', title: 'HTML Tables', videoId: 'uPdzSrjXAyY' },
+                    { id: 'l3', title: 'HTML Forms', videoId: 'No4zV8da1kw' }
+                ]
+            },
+            {
+                id: 'css3',
+                title: 'CSS & Flexbox',
+                instructor: 'Codetech Instructor',
+                thumbnail: 'https://i.ytimg.com/vi/Nc79Vc9SsqQ/hqdefault.jpg',
+                lessons: [
+                    { id: 'l1', title: 'CSS Basics', videoId: 'Nc79Vc9SsqQ' },
+                    { id: 'l2', title: 'Flexbox Tutorial', videoId: 'zqT9NqjG6ZQ' },
+                    { id: 'l3', title: 'Responsive CSS', videoId: '0pXT9xL3AEM' }
+                ]
+            },
+            {
+                id: 'fullstack',
+                title: 'Codetech Full Stack Series',
+                instructor: 'Codetech IT Solutions',
+                thumbnail: 'https://img.youtube.com/vi/lGKGDxwvrEQ/0.jpg',
+                lessons: [
+                    { id: 'l1', title: 'Full Stack Part 1', videoId: 'lGKGDxwvrEQ' },
+                    { id: 'l2', title: 'Full Stack Part 2', videoId: 'r3igz1dg0Xw' }
+                ]
+            }
+        ];
+
+        const courseList = document.getElementById('courseList');
+        const courseDetail = document.getElementById('courseDetail');
+        const detailTitle = document.getElementById('detailTitle');
+        const detailInstructor = document.getElementById('detailInstructor');
+        const lessonList = document.getElementById('lessonList');
+        const videoPlayer = document.getElementById('videoPlayer');
+
+        let currentLessonId = null;
+
+        courses.forEach(course => {
+            const card = document.createElement('div');
+            card.className = 'course-card';
+            card.innerHTML = `
+                <img src="${course.thumbnail}" class="course-thumbnail" />
+                <div class="course-title">${course.title}</div>
+                <div class="course-instructor">${course.instructor}</div>
+            `;
+            card.onclick = () => showCourseDetail(course);
+            courseList.appendChild(card);
+        });
+
+        function showCourseDetail(course) {
+            courseList.classList.add('hidden');
+            courseDetail.classList.remove('hidden');
+            detailTitle.textContent = course.title;
+            detailInstructor.textContent = `Instructor: ${course.instructor}`;
+            lessonList.innerHTML = '';
+
+            const firstLesson = course.lessons[0];
+            currentLessonId = firstLesson.id;
+            videoPlayer.src = `https://www.youtube.com/embed/${firstLesson.videoId}`;
+
+            course.lessons.forEach(lesson => {
+                const item = document.createElement('div');
+                item.className = 'lesson-item';
+                item.textContent = lesson.title;
+                if (lesson.id === currentLessonId) item.classList.add('active');
+                item.onclick = () => {
+                    currentLessonId = lesson.id;
+                    document.querySelectorAll('.lesson-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    videoPlayer.src = `https://www.youtube.com/embed/${lesson.videoId}`;
+                };
+                lessonList.appendChild(item);
+            });
+        }
+
+        function goBack() {
+            courseDetail.classList.add('hidden');
+            courseList.classList.remove('hidden');
+            videoPlayer.src = '';
+        }
+    </script>
+</body>
+</html>
